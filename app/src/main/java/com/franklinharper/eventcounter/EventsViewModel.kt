@@ -14,24 +14,16 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
-class CounterViewModel : ViewModel() {
-    private val _counts = MutableStateFlow<Map<String, String>>(emptyMap())
-    val counts = _counts.asStateFlow()
-    val events = mutableListOf<LocalDateTime>()
-
-//    init {
-//        viewModelScope.launch {
-//            while (true) {
-//                updateCounts()
-//                delay(timeMillis = 1_000L) // 1 second
-//            }
-//        }
-//    }
+class EventsViewModel : ViewModel() {
+    private val _eventData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val eventData = _eventData.asStateFlow()
+    private val eventTimes = mutableListOf<LocalDateTime>()
 
     init {
         viewModelScope.launch {
+            // Update EventData every second
             tickerFlow(1_000L).collect {
-                updateStats()
+                updateEventData()
             }
         }
     }
@@ -44,16 +36,16 @@ class CounterViewModel : ViewModel() {
     }
 
     fun addEvent() {
-        events += LocalDateTime.now()
-        updateStats()
+        eventTimes += LocalDateTime.now()
+        updateEventData()
     }
 
     fun resetEvents() {
-        events.clear()
-        updateStats()
+        eventTimes.clear()
+        updateEventData()
     }
 
-    fun updateStats() {
+    fun updateEventData() {
         val now = LocalDateTime.now()
         // There's no reason for this to be a Map! It should be a List.
         val newCounts = mutableMapOf<String, String>()
@@ -63,17 +55,16 @@ class CounterViewModel : ViewModel() {
                 startMinutes = startMinutes,
                 endMinutes = startMinutes + stepValue,
                 now = now,
-                events = events
+                events = eventTimes
             )
             newCounts[label] = value
         }
-        _counts.update {
+        _eventData.update {
             newCounts.toMap()
         }
     }
 
    fun stats(now: LocalDateTime, events: List<LocalDateTime>, startMinutes:Int, endMinutes: Int): Pair<String, String> {
-//       val label = "${startMinutes}-${endMinutes} minutes"
        val label = String.format("%02d", startMinutes) + "-" + String.format("%02d", endMinutes) + ": "
        val value = events.count { ChronoUnit.MINUTES.between(it, now) in startMinutes..<endMinutes }
        return label to "*".repeat(value)

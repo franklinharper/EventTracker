@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
 
-    val viewModel: CounterViewModel by viewModels()
+    val viewModel: EventsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +41,8 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun EventApp(viewModel: CounterViewModel) {
-        val counts by viewModel.counts.collectAsState()
+    fun EventApp(viewModel: EventsViewModel) {
+        val counts by viewModel.eventData.collectAsState()
 
         Scaffold(topBar = {
             TopAppBar(title = { Text("Event Tracker") })
